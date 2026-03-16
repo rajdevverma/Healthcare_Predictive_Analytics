@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Prediction Result{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Header -->
+    <div class="dashboard-header" style="justify-content: center; margin-bottom: 2rem;">
+        <div class="text-center">
+            <h1>Assessment Results</h1>
+            <p class="text-secondary">AI-generated health risk analysis based on clinical data.</p>
+        </div>
+    </div>
+
+    <div class="container" style="max-width: 800px;">
+        <div class="card" style="overflow: hidden;">
+            <div class="card-header text-center" style="background: #F8FAFC; padding: 2rem;">
+                <h2 id="diseaseType" class="card-title" style="font-size: 1.5rem; margin-bottom: 0.5rem;">Heart Disease
+                    Risk</h2>
+                <div id="predictionDate" style="font-size: 0.9rem; color: var(--text-muted);">
+                    <i class="ph ph-calendar-blank"></i> Loading date...
+                </div>
+            </div>
+
+            <div class="card-body text-center" style="padding: 3rem 2rem;">
+                <!-- Risk Percentage Display -->
+                <div style="margin-bottom: 3rem;">
+                    <div style="position: relative; width: 220px; height: 220px; margin: 0 auto;">
+                        <svg width="220" height="220" style="transform: rotate(-90deg);">
+                            <circle cx="110" cy="110" r="90" fill="none" stroke="#F1F5F9" stroke-width="12" />
+                            <circle id="riskCircle" cx="110" cy="110" r="90" fill="none" stroke-width="12"
+                                stroke-dasharray="565" stroke-dashoffset="565"
+                                style="transition: stroke-dashoffset 1.5s ease-out, stroke 0.3s ease; stroke-linecap: round;" />
+                        </svg>
+                        <div
+                            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center;">
+                            <div id="riskPercentage"
+                                style="font-size: 3.5rem; font-weight: 700; color: var(--text-main); line-height: 1;">0%
+                            </div>
+                            <div
+                                style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.5rem;">
+                                Risk Score</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Risk Level Badge -->
+                <div style="margin-bottom: 3rem;">
+                    <span id="riskBadge" class="badge"
+                        style="font-size: 1.1rem; padding: 0.5rem 1.5rem; letter-spacing: 0.02em;">
+                        Calculating...
+                    </span>
+                </div>
+
+                <!-- Recommendation -->
+                <div
+                    style="background: #F0FDFA; border: 1px solid #CCFBF1; border-radius: var(--radius-md); padding: 1.5rem; text-align: left;">
+                    <div style="display: flex; gap: 0.75rem;">
+                        <i class="ph-fill ph-check-circle" style="font-size: 1.5rem; color: var(--primary);"></i>
+                        <div>
+                            <strong style="color: var(--primary-dark); display: block; margin-bottom: 0.5rem;">Medical
+                                Recommendation</strong>
+                            <p id="recommendation" style="color: var(--text-main); line-height: 1.6; margin: 0;">
+                                Analyzing data...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer" style="padding: 1.5rem; background: #FFF; border-top: 1px solid var(--border);">
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <a href="/predict" class="btn btn-primary">
+                        <i class="ph ph-magnifying-glass"></i> New Prediction
+                    </a>
+                    <a href="/dashboard" class="btn btn-secondary">
+                        <i class="ph ph-squares-four"></i> Dashboard
+                    </a>
+                    <a href="/history" class="btn btn-secondary">
+                        <i class="ph ph-clock-counter-clockwise"></i> History
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function displayPrediction() {
+        const prediction = healthcareApp.storage.getStoredPrediction();
+
+        if (!prediction) {
+            alert('No prediction data found. Redirecting to form...');
+            window.location.href = '/predict';
+            return;
+        }
+
+        // Update disease type
+        const typeLabel = prediction.disease_type === 'heart' ? 'Heart Disease' :
+            (prediction.disease_type === 'diabetes' ? 'Diabetes' : prediction.disease_type);
+        document.getElementById('diseaseType').textContent = typeLabel + ' Risk Assessment';
+
+        // Update date
+        const date = new Date(prediction.prediction_date);
+        document.getElementById('predictionDate').innerHTML =
+            `<i class="ph ph-calendar-blank"></i> Assessment Date: ${date.toLocaleDateString('en-US', {
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            })}`;
+
+        // Update risk percentage with animation
+        const riskPercentage = prediction.risk_percentage;
+        const riskLevel = prediction.risk_level;
+
+        // Animate risk percentage
+        setTimeout(() => {
+            document.getElementById('riskPercentage').textContent = riskPercentage + '%';
+
+            // Calculate circle progress (2 * PI * 90 = ~565)
+            const circumference = 565;
+            const offset = circumference - (riskPercentage / 100) * circumference;
+            const circle = document.getElementById('riskCircle');
+            circle.style.strokeDashoffset = offset;
+
+            // Set color based on risk level
+            const colors = {
+                'Low': '#10B981',    // Green
+                'Medium': '#F59E0B', // Amber
+                'High': '#EF4444'    // Red
+            };
+            circle.style.stroke = colors[riskLevel] || '#64748B';
+        }, 100);
+
+        // Update risk badge
+        const badge = document.getElementById('riskBadge');
+        badge.textContent = riskLevel + ' Risk';
+        badge.className = 'badge badge-' + riskLevel.toLowerCase();
+
+        // Update recommendation
+        document.getElementById('recommendation').textContent = prediction.recommendation;
+    }
+
+    window.addEventListener('DOMContentLoaded', displayPrediction);
+</script>
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <!-- Left Side: Brand -->
+    <div class="auth-brand-side fade-in">
+        <i class="ph-fill ph-heartbeat brand-icon"></i>
+        <h1 style="color: white; font-size: 3rem; margin-bottom: 1rem;">MedAi</h1>
+        <p style="font-size: 1.25rem; opacity: 0.9; line-height: 1.6;">
+            Join the leading AI health platform.<br>
+            Collaborate, Predict, and Save Lives.
+        </p>
+    </div>
+
+    <!-- Right Side: Form -->
+    <div class="auth-form-side">
+        <div class="auth-form-wrapper fade-in" style="animation-delay: 0.1s;">
+            <div class="mb-4">
+                <h2 style="font-size: 2rem; margin-bottom: 0.5rem;">Create Account</h2>
+                <p class="text-secondary">Register as a new medical professional.</p>
+            </div>
+
+            <form id="registerForm" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label class="form-label" for="name">Full Name</label>
+                    <div style="position: relative;">
+                        <input type="text" id="name" name="name" class="form-input" placeholder="Dr. John Doe" required
+                            style="padding-left: 2.5rem;">
+                        <i class="ph ph-user"
+                            style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address</label>
+                    <div style="position: relative;">
+                        <input type="email" id="email" name="email" class="form-input" placeholder="doctor@hospital.com"
+                            required style="padding-left: 2.5rem;">
+                        <i class="ph ph-envelope"
+                            style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <div style="position: relative;">
+                        <input type="password" id="password" name="password" class="form-input"
+                            placeholder="Minimum 6 characters" required minlength="6" style="padding-left: 2.5rem;">
+                        <i class="ph ph-lock-key"
+                            style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                    </div>
+                    <div class="text-secondary" style="font-size: 0.85rem; margin-top: 0.25rem;">Must be at least 6
+                        characters</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="confirmPassword">Confirm Password</label>
+                    <div style="position: relative;">
+                        <input type="password" id="confirmPassword" name="confirmPassword" class="form-input"
+                            placeholder="Re-enter password" required style="padding-left: 2.5rem;">
+                        <i class="ph ph-lock-key"
+                            style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block" style="padding: 1rem;">
+                    Create Account
+                </button>
+            </form>
+
+            <p class="text-center mt-3 text-secondary">
+                Already have an account?
+                <a href="/login" style="color: var(--primary); font-weight: 600;">Sign in here</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function handleRegister(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const button = form.querySelector('button[type="submit"]');
+        const name = form.name.value;
+        const email = form.email.value;
+        const password = form.password.value;
+        const confirmPassword = form.confirmPassword.value;
+
+        // Validate passwords match
+        if (password !== confirmPassword) {
+            alert('Passwords do not match');
+            return;
+        }
+
+        try {
+            const originalText = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<i class="ph ph-spinner ph-spin"></i> creating account...';
+
+            const result = await healthcareApp.api.register(name, email, password);
+
+            if (result.success) {
+                button.innerHTML = '<i class="ph ph-check"></i> Success!';
+                button.style.backgroundColor = 'var(--success)';
+
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 1500);
+            }
+        } catch (error) {
+            button.disabled = false;
+            button.innerHTML = 'Create Account';
+            alert('Registration failed: ' + (error.message || 'Unknown error'));
+        }
+    }
+</script>
+{% endblock %}

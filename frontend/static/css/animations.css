@@ -1,0 +1,294 @@
+/*
+ * Healthcare Predictive Analytics - Animations
+ * Smooth micro-animations and transitions
+ */
+
+/* ===== FADE IN ANIMATION ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+}
+
+.fade-in-delay {
+    opacity: 0;
+    animation: fadeIn 0.6s ease-out 0.2s forwards;
+}
+
+/* ===== SLIDE IN FROM LEFT ===== */
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.5s ease-out;
+}
+
+/* ===== PULSE ANIMATION ===== */
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ===== PROGRESS BAR ANIMATION ===== */
+@keyframes progressFill {
+    from {
+        width: 0%;
+    }
+}
+
+.progress-bar {
+    height: 8px;
+    background: var(--gray-200);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+    border-radius: var(--radius-full);
+    animation: progressFill 1s ease-out forwards;
+}
+
+/* Risk percentage colors */
+.progress-fill.low {
+    background: linear-gradient(90deg, var(--risk-low), #34D399);
+}
+
+.progress-fill.medium {
+    background: linear-gradient(90deg, var(--risk-medium), #FBBF24);
+}
+
+.progress-fill.high {
+    background: linear-gradient(90deg, var(--risk-high), #F87171);
+}
+
+/* ===== CIRCULAR PROGRESS ===== */
+.circular-progress {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: conic-gradient(var(--primary-color) 0% 0%, var(--gray-200) 0% 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.circular-progress::before {
+    content: '';
+    position: absolute;
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    background: white;
+}
+
+.circular-progress-value {
+    position: relative;
+    z-index: 1;
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--gray-900);
+}
+
+/* ===== HOVER EFFECTS ===== */
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+}
+
+.hover-scale {
+    transition: transform 0.3s ease;
+}
+
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+
+/* ===== BUTTON LOADING STATE ===== */
+.btn-loading {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin-left: -10px;
+    margin-top: -10px;
+    border: 2px solid white;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+/* ===== SHAKE ANIMATION (for errors) ===== */
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: translateX(-5px);
+    }
+
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: translateX(5px);
+    }
+}
+
+.shake {
+    animation: shake 0.5s;
+}
+
+/* ===== GLOW EFFECT ===== */
+@keyframes glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 5px rgba(37, 99, 235, 0.5);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(37, 99, 235, 0.8);
+    }
+}
+
+.glow {
+    animation: glow 2s ease-in-out infinite;
+}
+
+/* ===== SKELETON LOADING ===== */
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, var(--gray-200) 25%, var(--gray-300) 50%, var(--gray-200) 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+    border-radius: var(--radius-md);
+}
+
+/* ===== CARD ENTRANCE ANIMATION ===== */
+.card-animate {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.card-animate:nth-child(1) {
+    animation-delay: 0.1s;
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+.card-animate:nth-child(2) {
+    animation-delay: 0.2s;
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+.card-animate:nth-child(3) {
+    animation-delay: 0.3s;
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+.card-animate:nth-child(4) {
+    animation-delay: 0.4s;
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+/* ===== TOOLTIP ANIMATION ===== */
+@keyframes tooltipFadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+.tooltip {
+    position: relative;
+}
+
+.tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translate(-50%, -8px);
+    background: var(--gray-800);
+    color: white;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.tooltip:hover::after {
+    opacity: 1;
+    animation: tooltipFadeIn 0.3s ease-out;
+}

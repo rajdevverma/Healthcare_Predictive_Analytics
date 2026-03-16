@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div>
+            <h1>Overview</h1>
+            <p class="text-secondary">Welcome back, {{ user_name }}! Here's what's happening today.</p>
+        </div>
+        <div style="display: flex; gap: var(--space-md);">
+            <a href="/predict" class="btn btn-primary">
+                <i class="ph ph-plus"></i> New Prediction
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-4 mb-4">
+        <div class="stat-card">
+            <div class="stat-card-icon">
+                <i class="ph-fill ph-users"></i>
+            </div>
+            <div class="stat-card-value" id="totalPatients">0</div>
+            <div class="stat-card-label">Total Patients</div>
+        </div>
+
+        <div class="stat-card success">
+            <div class="stat-card-icon">
+                <i class="ph-fill ph-chart-bar"></i>
+            </div>
+            <div class="stat-card-value" id="totalPredictions">0</div>
+            <div class="stat-card-label">Predictions Made</div>
+        </div>
+
+        <div class="stat-card danger">
+            <div class="stat-card-icon">
+                <i class="ph-fill ph-warning-octagon"></i>
+            </div>
+            <div class="stat-card-value" id="highRiskCount">0</div>
+            <div class="stat-card-label">High Risk Cases</div>
+        </div>
+
+        <div class="stat-card warning">
+            <div class="stat-card-icon">
+                <i class="ph-fill ph-bandaids"></i>
+            </div>
+            <div class="stat-card-value" id="mediumRiskCount">0</div>
+            <div class="stat-card-label">Medium Risk Cases</div>
+        </div>
+    </div>
+
+    <!-- Main Charts Section -->
+    <div class="grid grid-2 mb-4">
+        <div class="card">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 class="card-title">Risk Distribution</h3>
+                <i class="ph ph-chart-pie-slice" style="color: var(--text-muted);"></i>
+            </div>
+            <div class="card-body" style="height: 300px; display: flex; justify-content: center;">
+                <canvas id="riskChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 class="card-title">Disease Prevalence</h3>
+                <i class="ph ph-chart-donut" style="color: var(--text-muted);"></i>
+            </div>
+            <div class="card-body" style="height: 300px; display: flex; justify-content: center;">
+                <canvas id="diseaseChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions / Footer -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Quick Actions</h3>
+        </div>
+        <div class="card-body" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <a href="/history" class="btn btn-secondary">
+                <i class="ph ph-files"></i> View Patient History
+            </a>
+            <a href="/predict" class="btn btn-secondary">
+                <i class="ph ph-pencil-simple"></i> Draft New Report
+            </a>
+            <button class="btn btn-secondary" onclick="healthcareApp.ui.showAlert('Feature coming soon!', 'info')">
+                <i class="ph ph-download-simple"></i> Export Data
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let riskChart, diseaseChart;
+
+    async function loadDashboard() {
+        try {
+            const stats = await healthcareApp.api.getStatistics();
+
+            if (stats.success) {
+                const s = stats.statistics;
+
+                // Animate numbers (simple implementation)
+                document.getElementById('totalPatients').textContent = s.total_patients;
+                document.getElementById('totalPredictions').textContent = s.total_predictions;
+                document.getElementById('highRiskCount').textContent = s.risk_distribution.high;
+                document.getElementById('mediumRiskCount').textContent = s.risk_distribution.medium;
+
+                // Risk Center Text Plugin
+                const centerTextPlugin = {
+                    id: 'centerText',
+                    beforeDraw: function (chart) {
+                        if (chart.config.type !== 'doughnut') return;
+                        var width = chart.width,
+                            height = chart.height,
+                            ctx = chart.ctx;
+
+                        ctx.restore();
+                        var fontSize = (height / 114).toFixed(2);
+                        ctx.font = "bold " + fontSize + "em sans-serif";
+                        ctx.textBaseline = "middle";
+                        ctx.fillStyle = "#1E293B";
+
+                        var text = chart.config.data.datasets[0].data.reduce((a, b) => a + b, 0),
+                            textX = Math.round((width - ctx.measureText(text).width) / 2),
+                            textY = height / 2;
+
+                        ctx.fillText(text, textX, textY);
+                        ctx.save();
+                    }
+                };
+
+                // Risk Distribution Chart
+                const riskCtx = document.getElementById('riskChart').getContext('2d');
+                riskChart = new Chart(riskCtx, {
+                    type: 'doughnut', // Changed to doughnut for modern look
+                    data: {
+                        labels: ['Low', 'Medium', 'High'],
+                        datasets: [{
+                            data: [s.risk_distribution.low, s.risk_distribution.medium, s.risk_distribution.high],
+                            backgroundColor: ['#10B981', '#F59E0B', '#EF4444'],
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 8 } }
+                        }
+                    },
+                    plugins: [centerTextPlugin] // reuse for text inside if wanted, logic specific to total
+                });
+
+                // Disease Distribution Chart
+                const diseaseCtx = document.getElementById('diseaseChart').getContext('2d');
+                diseaseChart = new Chart(diseaseCtx, {
+                    type: 'bar', // Changed to bar for variety
+                    data: {
+                        labels: ['Heart Disease', 'Diabetes'],
+                        datasets: [{
+                            label: 'Cases',
+                            data: [s.disease_distribution.heart_disease, s.disease_distribution.diabetes],
+                            backgroundColor: ['#3B82F6', '#10B981'],
+                            borderRadius: 8, // Modern rounded bars
+                            barPercentage: 0.5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: '#F1F5F9' }, border: { display: false } },
+                            x: { grid: { display: false }, border: { display: false } }
+                        }
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Failed to load dashboard:', error);
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', loadDashboard);
+</script>
+{% endblock %}

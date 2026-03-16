@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Healthcare Predictive Analytics System - AI-powered disease risk prediction">
+    <title>{% block title %}Healthcare Analytics{% endblock %} | MedAi</title>
+
+    <!-- Google Fonts: Outfit (Headings) + Inter (Body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Phosphor Icons (Modern SVG Icons) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <div class="app-container">
+        {% if user_id %}
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <i class="ph-fill ph-heartbeat" style="font-size: 1.5rem;"></i>
+                <span>Predictive Analytics for Healthcare</span>
+            </div>
+
+            <nav style="flex: 1;">
+                <ul style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <li>
+                        <a href="/dashboard" class="nav-link {% if request.path == '/dashboard' %}active{% endif %}">
+                            <i class="ph ph-squares-four"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/predict" class="nav-link {% if request.path == '/predict' %}active{% endif %}">
+                            <i class="ph ph-stethoscope"></i>
+                            <span>New Prediction</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/history" class="nav-link {% if request.path == '/history' %}active{% endif %}">
+                            <i class="ph ph-clock-counter-clockwise"></i>
+                            <span>History</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="#" onclick="handleLogout()" class="nav-link" style="color: var(--danger);">
+                    <i class="ph ph-sign-out"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+        {% endif %}
+
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Main JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <script>
+        // Logout handler
+        async function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                try {
+                    await healthcareApp.api.logout();
+                    window.location.href = '/login';
+                } catch (error) {
+                    alert('Logout failed: ' + error.message);
+                }
+            }
+        }
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

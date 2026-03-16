@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Prediction{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div>
+            <h1>Disease Risk Prediction</h1>
+            <p class="text-secondary">Enter patient data to generate an AI assessment.</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <form id="predictionForm" onsubmit="handlePrediction(event)">
+            <div data-section="basics">
+                <div class="card-header">
+                    <h3 class="card-title">Patient Basics</h3>
+                </div>
+                <div class="card-body">
+                    <div class="grid grid-2">
+                        <div class="form-group">
+                            <label class="form-label" for="patientName">Patient Name</label>
+                            <div style="position: relative;">
+                                <input type="text" id="patientName" name="patientName" class="form-input"
+                                    placeholder="e.g. John Doe" required style="padding-left: 2.5rem;">
+                                <i class="ph ph-user"
+                                    style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="diseaseType">Analysis Type</label>
+                            <div style="position: relative;">
+                                <select id="diseaseType" name="diseaseType" class="form-input"
+                                    onchange="toggleDiseaseForm()" required
+                                    style="padding-left: 2.5rem; appearance: none;">
+                                    <option value="">Select disease type...</option>
+                                    <option value="heart">Heart Disease Risk</option>
+                                    <option value="diabetes">Diabetes Risk</option>
+                                </select>
+                                <i class="ph ph-stethoscope"
+                                    style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                                <i class="ph ph-caret-down"
+                                    style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Heart Disease Form -->
+            <div id="heartForm" class="hidden" style="border-top: 1px solid var(--border);">
+                <div class="card-header" style="background: #F8FAFC;">
+                    <h3 class="card-title" style="color: var(--danger);">Cardiovascular Parameters</h3>
+                    <p class="card-subtitle">Clinical measurements for heart health</p>
+                </div>
+                <div class="card-body">
+                    <div class="grid grid-4" style="gap: var(--space-lg);">
+                        <div class="form-group">
+                            <label class="form-label">Age</label>
+                            <input type="number" name="age" class="form-input" placeholder="45" min="0" max="120">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Sex</label>
+                            <select name="sex" class="form-input">
+                                <option value="1">Male</option>
+                                <option value="0">Female</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Chest Pain (0-3)</label>
+                            <input type="number" name="cp" class="form-input" placeholder="2" min="0" max="3">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Resting BP</label>
+                            <input type="number" name="trestbps" class="form-input" placeholder="120" min="50"
+                                max="200">
+                        </div>
+
+                        <!-- Row 2 -->
+                        <div class="form-group">
+                            <label class="form-label">Cholesterol</label>
+                            <input type="number" name="chol" class="form-input" placeholder="200" min="100" max="600">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Fasting BS > 120</label>
+                            <select name="fbs" class="form-input">
+                                <option value="0">False</option>
+                                <option value="1">True</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Resting ECG (0-2)</label>
+                            <input type="number" name="restecg" class="form-input" placeholder="0" min="0" max="2">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Max Heart Rate</label>
+                            <input type="number" name="thalach" class="form-input" placeholder="150" min="60" max="220">
+                        </div>
+
+                        <!-- Row 3 -->
+                        <div class="form-group">
+                            <label class="form-label">Exercise Angina</label>
+                            <select name="exang" class="form-input">
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">ST Depression</label>
+                            <input type="number" name="oldpeak" class="form-input" placeholder="1.0" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">ST Slope (0-2)</label>
+                            <input type="number" name="slope" class="form-input" placeholder="1" min="0" max="2">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Major Vessels (0-4)</label>
+                            <input type="number" name="ca" class="form-input" placeholder="0" min="0" max="4">
+                        </div>
+
+                        <!-- Row 4 -->
+                        <div class="form-group">
+                            <label class="form-label">Thalassemia (0-3)</label>
+                            <input type="number" name="thal" class="form-input" placeholder="2" min="0" max="3">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diabetes Form -->
+            <div id="diabetesForm" class="hidden" style="border-top: 1px solid var(--border);">
+                <div class="card-header" style="background: #F8FAFC;">
+                    <h3 class="card-title" style="color: var(--primary);">Diabetes Parameters</h3>
+                </div>
+                <div class="card-body">
+                    <div class="grid grid-4">
+                        <div class="form-group">
+                            <label class="form-label">Pregnancies</label>
+                            <input type="number" name="pregnancies" class="form-input" placeholder="0" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Glucose</label>
+                            <input type="number" name="glucose" class="form-input" placeholder="120">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Blood Pressure</label>
+                            <input type="number" name="blood_pressure" class="form-input" placeholder="70">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Skin Thickness</label>
+                            <input type="number" name="skin_thickness" class="form-input" placeholder="20">
+                        </div>
+
+                        <!-- Row 2 -->
+                        <div class="form-group">
+                            <label class="form-label">Insulin</label>
+                            <input type="number" name="insulin" class="form-input" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">BMI</label>
+                            <input type="number" name="bmi" class="form-input" placeholder="25.5" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Diabetes Pedigree</label>
+                            <input type="number" name="diabetes_pedigree" class="form-input" placeholder="0.5"
+                                step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Age</label>
+                            <input type="number" name="age_diabetes" class="form-input" placeholder="45">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer"
+                style="padding: var(--space-lg); background: #F8FAFC; border-top: 1px solid var(--border); display: flex; gap: 1rem; justify-content: flex-end;">
+                <button type="reset" class="btn btn-secondary" onclick="resetForm()">
+                    Reset
+                </button>
+                <button type="submit" class="btn btn-primary" style="padding-left: 2rem; padding-right: 2rem;">
+                    Run Prediction <i class="ph-bold ph-arrow-right"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .hidden {
+        display: none;
+    }
+</style>
+
+<script>
+    function toggleDiseaseForm() {
+        const diseaseType = document.getElementById('diseaseType').value;
+        const heartForm = document.getElementById('heartForm');
+        const diabetesForm = document.getElementById('diabetesForm');
+
+        heartForm.classList.add('hidden');
+        diabetesForm.classList.add('hidden');
+
+        if (diseaseType === 'heart') {
+            heartForm.classList.remove('hidden');
+            heartForm.classList.add('fade-in');
+        } else if (diseaseType === 'diabetes') {
+            diabetesForm.classList.remove('hidden');
+            diabetesForm.classList.add('fade-in');
+        }
+    }
+
+    function resetForm() {
+        setTimeout(() => {
+            document.getElementById('heartForm').classList.add('hidden');
+            document.getElementById('diabetesForm').classList.add('hidden');
+        }, 10);
+    }
+
+    async function handlePrediction(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const button = form.querySelector('button[type="submit"]');
+        const diseaseType = form.diseaseType.value;
+        const patientName = form.patientName.value;
+
+        if (!diseaseType) {
+            alert('Please select a disease type first.');
+            return;
+        }
+
+        try {
+            const originalText = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Processing...';
+
+            let data = { patient_name: patientName };
+            let result;
+
+            if (diseaseType === 'heart') {
+                data.age = parseFloat(form.age.value);
+                data.sex = parseFloat(form.sex.value);
+                data.cp = parseFloat(form.cp.value);
+                data.trestbps = parseFloat(form.trestbps.value);
+                data.chol = parseFloat(form.chol.value);
+                data.fbs = parseFloat(form.fbs.value);
+                data.restecg = parseFloat(form.restecg.value);
+                data.thalach = parseFloat(form.thalach.value);
+                data.exang = parseFloat(form.exang.value);
+                data.oldpeak = parseFloat(form.oldpeak.value);
+                data.slope = parseFloat(form.slope.value);
+                data.ca = parseFloat(form.ca.value);
+                data.thal = parseFloat(form.thal.value);
+
+                result = await healthcareApp.api.predictHeartDisease(data);
+            } else {
+                data.pregnancies = parseFloat(form.pregnancies.value);
+                data.glucose = parseFloat(form.glucose.value);
+                data.blood_pressure = parseFloat(form.blood_pressure.value);
+                data.skin_thickness = parseFloat(form.skin_thickness.value);
+                data.insulin = parseFloat(form.insulin.value);
+                data.bmi = parseFloat(form.bmi.value);
+                data.diabetes_pedigree = parseFloat(form.diabetes_pedigree.value);
+                data.age = parseFloat(form.age_diabetes.value);
+
+                result = await healthcareApp.api.predictDiabetes(data);
+            }
+
+            if (result.success) {
+                healthcareApp.storage.storePredictionResult(result.prediction);
+                window.location.href = '/result';
+            }
+        } catch (error) {
+            button.disabled = false;
+            button.innerHTML = originalText;
+            alert('Prediction failed: ' + (error.message || 'Unknown error'));
+        }
+    }
+</script>
+{% endblock %}

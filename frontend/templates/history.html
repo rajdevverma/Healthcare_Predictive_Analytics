@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Patient History{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div>
+            <h1>Patient History</h1>
+            <p class="text-secondary">Track all past predictions and patient records.</p>
+        </div>
+        <button onclick="loadHistory()" class="btn btn-secondary">
+            <i class="ph ph-arrows-clockwise"></i> Refresh
+        </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="card mb-4">
+        <div class="card-body" style="padding: var(--space-md);">
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <i class="ph ph-magnifying-glass" style="font-size: 1.2rem; color: var(--text-muted);"></i>
+                <input type="text" id="searchInput" class="form-input" placeholder="Search by patient name or ID..."
+                    onkeyup="handleSearch()" style="border: none; padding: 0.5rem; background: transparent;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Predictions Table -->
+    <div class="card">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 class="card-title">Recent Records</h3>
+            <span class="badge" id="totalCount"
+                style="background: var(--bg-body); color: var(--text-muted);">Loading...</span>
+        </div>
+
+        <div class="card-body" style="padding: 0;">
+            <div style="overflow-x: auto;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Patient Name</th>
+                            <th>Disease Type</th>
+                            <th>Risk Assessment</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 3rem;">
+                                <i class="ph ph-spinner ph-spin" style="font-size: 2rem; color: var(--primary);"></i>
+                                <p style="margin-top: 1rem; color: var(--text-muted);">Loading patient records...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let allPredictions = [];
+
+    async function loadHistory() {
+        try {
+            const result = await healthcareApp.api.getPredictionHistory();
+
+            if (result.success) {
+                allPredictions = result.predictions;
+                displayPredictions(allPredictions);
+
+                document.getElementById('totalCount').textContent = `${result.count} Records`;
+            }
+        } catch (error) {
+            console.error('Failed to load history:', error);
+            document.getElementById('historyTableBody').innerHTML = `
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 2rem; color: var(--danger);">
+                    Failed to load predictions. Need to reload.
+                </td>
+            </tr>
+        `;
+        }
+    }
+
+    function displayPredictions(predictions) {
+        const tbody = document.getElementById('historyTableBody');
+
+        if (predictions.length === 0) {
+            tbody.innerHTML = `
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                    <div style="margin-bottom: 1rem; font-size: 3rem;">📭</div>
+                    No records found. <a href="/predict" style="color: var(--primary); font-weight: 600;">Make a new prediction</a>
+                </td>
+            </tr>
+        `;
+            return;
+        }
+
+        tbody.innerHTML = predictions.map(pred => {
+            const badgeClass = `badge-${pred.risk_level.toLowerCase()}`;
+            const diseaseLabel = pred.disease_type === 'heart_disease' ? 'Heart Disease' : 'Diabetes';
+            const date = new Date(pred.prediction_date).toLocaleDateString(undefined, {
+                year: 'numeric', month: 'short', day: 'numeric'
+            });
+
+            return `
+            <tr class="fade-in">
+                <td>
+                    <div style="font-weight: 500; color: var(--text-main);">${pred.patient_name || 'N/A'}</div>
+                </td>
+                <td>
+                    <span style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">
+                        <i class="ph-fill ${pred.disease_type === 'heart_disease' ? 'ph-heartbeat' : 'ph-drop'}" 
+                           style="color: ${pred.disease_type === 'heart_disease' ? 'var(--danger)' : 'var(--primary)'}"></i>
+                        ${diseaseLabel}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge ${badgeClass}" style="margin-right: 0.5rem;">${pred.risk_level}</span>
+                    <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">${pred.risk_percentage}%</span>
+                </td>
+                <td style="color: var(--text-muted); font-size: 0.9rem;">${date}</td>
+                <td>
+                    <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" onclick="viewDetails('${pred.id}')">
+                        View
+                    </button>
+                </td>
+            </tr>
+        `;
+        }).join('');
+    }
+
+    function handleSearch() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+        if (!searchTerm) {
+            displayPredictions(allPredictions);
+            return;
+        }
+
+        const filtered = allPredictions.filter(pred =>
+            (pred.patient_name && pred.patient_name.toLowerCase().includes(searchTerm)) ||
+            (pred.patient_id && pred.patient_id.toLowerCase().includes(searchTerm))
+        );
+
+        displayPredictions(filtered);
+    }
+
+    function viewDetails(id) {
+        // Mock function for now, or redirect to a details page if it exists
+        // window.location.href = `/prediction/${id}`;
+        alert('View details for ID: ' + id);
+    }
+
+    window.addEventListener('DOMContentLoaded', loadHistory);
+</script>
+{% endblock %}
