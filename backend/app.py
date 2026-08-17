@@ -189,4 +189,4 @@ if __name__ == '__main__':
     db_pass = app.config.get('MYSQL_PASSWORD')
     print(f"DEBUG: DB_PASS={'*' * len(db_pass) if db_pass else 'NONE'}")
 
-    app.run(debug=app.config['DEBUG'], host='0.0.0.0', port=5001)
+    app.run(debug=app.config['DEBUG'], host='0.0.0.0', port=int(os.environ.get('PORT', 5001)))
